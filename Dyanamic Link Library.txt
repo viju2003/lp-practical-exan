@@ -1,0 +1,80 @@
+Execution Steps:
+
+Note: Runs only on Ubuntu
+------------Create files B1.java & B1.c first------------------
+1)javac B1.java    --> javah -classpath . B1
+2)ls    --> B1.c B1.c~ B1.class B1.h B1.java
+3)gcc -shared -fPIC -I/usr/lib/jvm/default-java/include -I/usr/lib/jvm/default-java/include/linux B1.c -o libB1.so 
+4)ls    --> B1.c B1.c~ B1.class B1.h B1.java libB1.so
+5)java -classpath . -Djava.library.path=. B1     --> Hello World!
+
+
+
+B1.java
+
+import java.util.*;
+
+class B1 {
+    static {
+        System.loadLibrary("B1");
+    }
+    private native int add(int a, int b);
+    private native int sub(int a, int b);
+    private native int mult(int a, int b);
+    private native int div(int a, int b);
+
+    public static void main(String[] args) {
+        try (Scanner sc = new Scanner(System.in)) {
+            int a, b, ch;
+            System.out.println("\nEnter value of a : ");
+            a = sc.nextInt();
+            System.out.println("\nEnter value of b : ");
+            b = sc.nextInt();
+            do {
+                System.out.println("\nEnter your choice : ");
+                ch = sc.nextInt();
+                switch (ch) {
+                    case 1:
+                        new B1().add(a, b);
+                        break;
+                    case 2:
+                        new B1().sub(a, b);
+                        break;
+                    case 3:
+                        new B1().mult(a, b);
+                        break;
+                    case 4:
+                        new B1().div(a, b);
+                        break;
+                    default:
+                        System.out.println("Your choice is wrong.");
+                }
+            } while (ch < 5);
+        }
+    }
+}
+
+
+
+B1.c 
+
+#include <jni.h>
+#include <stdio.h>
+#include "B1.h"
+
+JNIEXPORT int JNICALL Java_B1_add(JNIEnv *env, jobject obj, jint a, jint b){
+    printf("\n%d + %d = %d\n", a, b, (a + b));
+    return;
+}
+JNIEXPORT int JNICALL Java_B1_sub(JNIEnv *env, jobject obj, jint a, jint b){
+    printf("\n%d - %d = %d\n", a, b, (a - b));
+    return;
+}
+JNIEXPORT int JNICALL Java_B1_mult(JNIEnv *env, jobject obj, jint a, jint b){
+    printf("\n%d * %d = %d\n", a, b, (a * b));
+    return;
+}
+JNIEXPORT int JNICALL Java_B1_div(JNIEnv *env, jobject obj, jint a, jint b){
+    printf("\n%d / %d = %d\n", a, b, (a / b));
+    return;
+}
