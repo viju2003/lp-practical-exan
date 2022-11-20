@@ -1,1 +1,9 @@
+7.Write a program to simulate CPU Scheduling Algorithms: FCFS, SJF (Preemptive)
+Process        AT                   BT
+P1             10                   2
+P2             0                    10
+P3             8                    4
+P4             5                    5
+
+
 
