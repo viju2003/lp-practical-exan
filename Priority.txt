@@ -1,0 +1,150 @@
+CODE:
+
+import java.util.Scanner;
+
+public class Priority {
+    public static void swap(int[] a, int s1, int s2) {
+        int temp = a[s1];
+        a[s1] = a[s2];
+        a[s2] = temp;
+    }
+
+    public static void main(String args[]) {
+        try (Scanner sc = new Scanner(System.in)) {
+            System.out.println("Enter no of process : ");
+            int n = sc.nextInt();
+            int pid[] = new int[n];
+            int at[] = new int[n];
+            int bt[] = new int[n];
+            int prio[] = new int[n];
+            int ct[] = new int[n];
+            int tat[] = new int[n];
+            int wt[] = new int[n];
+            int f[] = new int[n];
+            int i, st = 0, tot = 0;
+            float avg_wt = 0, avg_tat = 0;
+
+            for (i = 0; i < n; i++) {
+                pid[i] = i + 1;
+                System.out.println("Enter arrival time of process " + (i + 1) + ":");
+                at[i] = sc.nextInt();
+                System.out.println("Enter burst time of process " + (i + 1) + ":");
+                bt[i] = sc.nextInt();
+                System.out.println("Enter priority of process " + (i + 1) + ":");
+                prio[i] = sc.nextInt();
+            }
+
+            for (i = 0; i < n; i++) {
+                for (int j = 0; j < n - (i + 1); j++) {
+                    if (at[j] > at[j + 1]) {
+                        swap(at, j, j + 1);
+                        swap(bt, j, j + 1);
+                        swap(pid, j, j + 1);
+                        swap(prio, j, j + 1);
+                    }
+                }
+            }
+
+            while (true) {
+                int min = 99, c = n;
+                if (tot == n)
+                    break;
+
+                for (i = 0; i < n; i++) {
+                    if ((at[i] <= st) && (f[i] == 0) && (bt[i] < min)) {
+                        min = bt[i];
+                        c = i;
+                    }
+                }
+
+                if (c == n)
+                    st++;
+                else {
+                    ct[c] = st + bt[c];
+                    st = st + bt[c];
+                    f[c] = 1;
+                    tot++;
+                }
+
+                for (i = 0; i < n; i++) {
+                    for (int j = 0; j < n - (i + 1); j++) {
+                        if (st >= at[j] && st >= at[j + 1]) {
+                            if (prio[j] > prio[j + 1]) {
+                                swap(at, j, j + 1);
+                                swap(bt, j, j + 1);
+                                swap(pid, j, j + 1);
+                                swap(prio, j, j + 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (i = 0; i < n; i++) {
+                if (i == 0)
+                    ct[i] = at[i] + bt[i];
+                else {
+                    if (at[i] > ct[i - 1]) {
+                        ct[i] = at[i] + bt[i];
+                        f[i] = 1;
+                    } else {
+                        ct[i] = ct[i - 1] + bt[i];
+                        f[i] = 1;
+                    }
+                }
+                tat[i] = ct[i] - at[i];
+                wt[i] = tat[i] - bt[i];
+                avg_wt += wt[i];
+                avg_tat += tat[i];
+            }
+
+            System.out.println("Pid\tAT\tBT\tPRIO\tCT\tTAT\tWT\n");
+            for (i = 0; i < n; i++) {
+                System.out.println(pid[i] + "\t" + at[i] + "\t" + bt[i] + "\t" + prio[i] + "\t" + ct[i] + "\t" + tat[i] + "\t" + wt[i]);
+            }
+            sc.close();
+            System.out.print("\n Average Wait Time : " + avg_wt);
+            System.out.print("\n Average Turn Around Time : " + avg_tat);
+        }
+    }
+}
+
+
+
+OUTPUT:
+
+Enter no of process : 
+4
+Enter arrival time of process 1:
+10
+Enter burst time of process 1:
+2
+Enter priority of process 1:
+4
+Enter arrival time of process 2:
+0
+Enter burst time of process 2:
+10
+Enter priority of process 2:
+1
+Enter arrival time of process 3:
+8
+Enter burst time of process 3:
+4
+Enter priority of process 3:
+2
+Enter arrival time of process 4:
+5
+Enter burst time of process 4:
+5
+Enter priority of process 4:
+3
+
+Pid     AT      BT      PRIO    CT      TAT     WT
+2       0       10      1       10      10      0
+3       8       4       2       14      6       2
+4       5       5       3       19      14      9
+1       10      2       4       21      11      9
+
+ Average Wait Time : 5.0
+ Average Turn Around Time : 10.25
