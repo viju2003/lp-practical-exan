@@ -1,1 +1,6 @@
+13. Write a program to simulate Page replacement algorithm. 
+       1. FIFO 2. OPTIMAL
+
+ Input reference String :- 2 3 2 1 5 2 4 5 3 2 5 2  
+ No. of frames are:- 3
 
