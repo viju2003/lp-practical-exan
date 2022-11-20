@@ -1,3 +1,5 @@
+Mutex
+
 
 CODE:
 
@@ -81,7 +83,7 @@ Thread Thread-0: End critical section, leavesynchronized block
 Testcase completed
 
 
-
+Semaphore
 
 CODE:
 
