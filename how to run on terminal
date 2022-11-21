@@ -1,0 +1,13 @@
+   Gedit <filename>.java
+ For compiling  Javac <filename>.java
+ For output  Java <filename>
+ 
+ 
+ 
+ for prob.5 socket
+ java server                                java client                          
+ java Server.java                           java client.java
+ javac Server.java                          javac client.java
+ hii Server i am vijay                      hii Server i am ajay
+ 
+ 
