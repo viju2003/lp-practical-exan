@@ -1,103 +1,120 @@
 5.Implementation of Inter-process communication using socket programming: implementing multithreaded echo server. 
 
-server
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.channels.ServerSocketChannel;
-
-public class multithreadedserver {
-    public static void main(String[] args) {
-        ServerSocket server = null;
-        try {
-            server = new ServerSocket(5000);
-            server.setReuseAddress(true);
-            while (true){
-                Socket client = server.accept();
-                System.out.println("New Client Connected: "+client.getInetAddress().getHostAddress());
-                ClientHandler clientSocket = new ClientHandler(client);
-                new Thread(clientSocket).start();
-            }
-        }catch (IOException e){
-            e.printStackTrace();
-        }finally {
-            if(server!=null){
-                try {
-                    server.close();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-    private static class ClientHandler implements Runnable{
-        private final Socket clientSocket;
-        public ClientHandler(Socket socket){
-            this.clientSocket = socket;
-        }
-        @Override
-        public void run() {
-            PrintWriter out = null;
-            BufferedReader in = null;
-            try {
-                out = new PrintWriter(clientSocket.getOutputStream(),true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String line = null;
-                while ((line = in.readLine())!=null){
-                    System.out.println("Sent From the Client"+line);
-                    out.println(line);
-                }
-            }catch (IOException e){
-                e.printStackTrace();
-            }finally {
-                try {
-                    if(out!=null){
-                        out.close();
-                    }
-                    if(in!=null){
-                        in.close();
-                    }
-                    clientSocket.close();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-}
-
 client
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Scanner;
+import java.lang.System;
+import java.net.*;
+import java.io.*;
 
-public class echoclient {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String host = "127.0.0.1";
-        int port = 5000;
-        try (Socket socket = new Socket(host,port)){
-            PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String line = null;
-            while (!"exit".equalsIgnoreCase(line)){
-                line = sc.nextLine();
-                out.println(line);
-                out.flush();
-                System.out.println("Server Replied: "+in.readLine());
+public class Client{
+static Socket connection;
+
+public static void main(String a[])throws SocketException
+{
+try
+{
+int v[]=new int[9];
+int n=0;
+InetAddress addr = InetAddress.getByName("Localhost");
+ System.out.println(addr);
+
+connection = new Socket(addr, 8011); 
+DataOutputStream out = new DataOutputStream(
+
+connection.getOutputStream());
+
+DataInputStream in = new DataInputStream(
+
+connection.getInputStream());
+ int p = in.read();
+
+System.out.println("No of frame is:" + p);
+
+for (int i=0; i<p; i++) 
+{
+ v[i]= in.read();
+
+System.out.println(v[i]);
+}
+v[5] = -1; 
+for (int i=0; i<p; i++)
+{
+System.out.println("Received frame is: " + v[i]);
+}
+for (int i=0; i<p; i++)
+
+if (v[i]==-1)
+{
+ System.out.println("Request to retransmit packet no " +(i+1)+" again!!");
+
+n=i;
+out.write(n);
+ out.flush();
+ }
+
+System.out.println();
+
+v[n] = in.read();
+System.out.println("Received frame is:"+ v[n]);
+System.out.print("quiting");
+}
+catch(Exception e)
+{
+System.out.println(e);
+}
+}
+}
+
+Server
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+
+public class Server{
+	static ServerSocket Serversocket;
+	static DataInputStream dis;
+    static DataOutputStream dos;
+
+    public static void main(String[] args) throws SocketException{
+        try{
+            int a[] = {30, 40, 50, 60, 70, 80, 90, 100, 110};
+            Serversocket = new ServerSocket(8011);
+            System.out.println("wating for connection");
+            Socket client = Serversocket.accept();
+            dis = new DataInputStream(client.getInputStream());
+            dos = new DataOutputStream(client.getOutputStream());
+            System.out.println("The number of packets sent is: " + a.length);
+            int y = a.length;
+            dos.write(y);
+            dos.flush();
+
+            for (int i = 0; i < a.length; i++) {
+                dos.write(a[i]);
+                dos.flush();
             }
-        }  catch (IOException e) {
-            e.printStackTrace();
+
+            int k = dis.read();
+
+            dos.write(a[k]);
+            dos.flush();
+        } catch(IOException e) {
+            System.out.println(e);
+        } finally {
+            try{
+                dis.close();
+                dos.close();
+            } catch(IOException e){
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 }
 
+Output
+
+  
