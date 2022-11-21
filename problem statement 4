@@ -1,1 +1,130 @@
 4. Write a program to solve Classical Problems of Synchronization using Mutex and Semaphore 
+
+Mutex
+
+public class mutex {
+    public final static int NUMTHREADS = 3;
+    public static int sharedData = 0;
+    public static int sharedData2 = 0;
+
+    static class theLock extends Object {
+    }
+
+    static public theLock lockObject = new theLock();
+
+    static class theThread extends Thread {
+        public void run() {
+            System.out.print("Thread " + getName() + ": Entered\n");
+            synchronized (lockObject) {
+                /********** Critical Section *******************/
+                System.out.println("Thread " + getName() + ": Start critical section, insynchronized block\n");
+                ++sharedData;
+                --sharedData2;
+                System.out.print("Thread " + getName() + ": End critical section, leavesynchronized block\n");
+                /********** Critical Section *******************/
+            }
+        }
+    }
+
+    public static void main(String argv[]) {
+        theThread threads[] = new theThread[NUMTHREADS];
+        System.out.print("Entered the testcase\n");
+        System.out.print("Synchronize to prevent access to shared data\n");
+        synchronized (lockObject) {
+            System.out.print("Create/start the thread\n");
+            for (int i = 0; i < NUMTHREADS; ++i) {
+                threads[i] = new theThread();
+                threads[i].start();
+            }
+            System.out.print("Wait a bit until we're 'done' with the shared data\n");
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                System.out.print("sleep interrupted\n");
+            }
+            System.out.print("Unlock shared data\n");
+        }
+        System.out.print("Wait for the threads to complete\n");
+        try {
+            for (int i = 0; i < NUMTHREADS; ++i) {
+                threads[i].join();
+                System.out.print("Testcase completed\n");
+                System.exit(0);
+            }
+        } catch (InterruptedException e) {
+            System.out.print("Join interrupted\n");
+        }
+    }
+}
+
+
+Semaphore 
+
+import java.util.*;
+import java.util.concurrent.*;
+
+class SharedResource {
+    static int count = 0;
+}
+
+class MyThread extends Thread {
+    Semaphore semaphore;
+    String threadName;
+
+    public MyThread(Semaphore semaphore, String threadName) {
+        super(threadName);
+        this.semaphore = semaphore;
+        this.threadName = threadName;
+    }
+
+    public void run() {
+        if (this.getName().equals("Thread1")) {
+            System.out.println("Starting " + threadName);
+            try {
+                System.out.println(threadName + " is waiting for a permit.");
+                semaphore.acquire();
+                System.out.println(threadName + " gets a permit.");
+                for (int i = 0; i < 5; i++) {
+                    SharedResource.count++;
+                    System.out.println(threadName + ": " + SharedResource.count);
+                    Thread.sleep(10);
+                }
+            } catch (InterruptedException exc) {
+                System.out.println(exc);
+            }
+            System.out.println(threadName + " releases the permit.");
+            semaphore.release();
+        } else {
+            System.out.println("Starting " + threadName);
+            try {
+                System.out.println(threadName + " is waiting for a permit.");
+                semaphore.acquire();
+                System.out.println(threadName + " gets a permit.");
+                for (int i = 0; i < 5; i++) {
+                    SharedResource.count--;
+                    System.out.println(threadName + ": " + SharedResource.count);
+                    Thread.sleep(10);
+                }
+            } catch (InterruptedException exc) {
+                System.out.println(exc);
+            }
+            System.out.println(threadName + " releases the permit.");
+            semaphore.release();
+        }
+    }
+}
+
+
+public class mutex {
+    public static void main(String args[]) throws InterruptedException {
+        Semaphore semaphore = new Semaphore(1);
+        MyThread t1 = new MyThread(semaphore, "Thread1");
+        MyThread t2 = new MyThread(semaphore, "Thread2");
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+        System.out.println("count: " + SharedResource.count);
+    }
+}
+
