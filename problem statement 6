@@ -1,1 +1,131 @@
 6.Simulation of election algorithms (Ring and Bully). 
+
+BULLY:
+import java.util.*;
+public class Main
+{
+	public static void main(String[] args) {
+	    Scanner Sc=new Scanner(System.in);
+	    int ps[]=new int[5];
+	    int start,cordinator;
+	    System.out.println("enter the all processes");
+	    for(int i=0;i<5;i++)
+	    {
+	        ps[i]=Sc.nextInt();
+	    }
+	    System.out.println("Enter The starting point");
+	    start=Sc.nextInt();
+	    
+	    for(int i=1;i<=start;i++)
+	    {
+	        System.out.println("Process"+ps[0]+"Sends election message  " +ps[i]);
+	    }
+try {
+Thread.sleep(10000);
+} catch (InterruptedException e) {
+e.printStackTrace();
+}	    for(int i=start;i>=0;i--)
+	    {
+	        System.out.println("Process"+ps[i]+"responds(OK) to"+ps[0]);
+	    }
+	    
+	    System.out.println("\n");
+	    for(int i=1;i<=start-1;i++)
+	    {
+	        System.out.println("Process"+ps[1]+"Sends Election Message to"+ps[i+1]);
+	    }
+	    try {
+Thread.sleep(10000);
+} catch (InterruptedException e) {
+e.printStackTrace();
+}
+	    
+	    for(int i=start;i>=1;i--)
+	    {
+	        System.out.println("Process" +ps[i]+"responds(OK) to "+ps[1]);
+	    }
+	    
+	    for(int i=3;i<=start;i++)
+	    {
+	        	        System.out.println("Process"+ps[2]+"Sends Election Message to"+ps[i]);
+
+	    }
+	    try {
+Thread.sleep(10000);
+} catch (InterruptedException e) {
+e.printStackTrace();
+}
+	    System.out.println("\n");
+	    for(int i=start;i>2;i--)
+	    {
+	        	        System.out.println("Process" +ps[i]+"responds(OK) to "+ps[2]);
+
+	    }
+	    	    System.out.println("\n");
+
+	    for(int i=4;i<=start;i++)
+	    {
+	        cordinator=i;
+	        System.out.println("Process"+ps[3]+"sends Election message to"+ps[i]);
+	    }
+	    
+	    for(int i=start;i>3;i--)
+	    {
+	        cordinator=i;
+	    System.out.println("Process" +ps[i]+"responds(OK) to "+ps[3]);
+       
+	    }
+	    
+	    System.out.println(ps[start-1]+" Is THE CORDINATOR");
+	}
+}
+
+
+ring
+
+import java.lang.reflect.Array;
+import java.util.*;
+
+public class ringAlgorithm {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter No of Nodes: ");
+        int t_nodes = sc.nextInt();
+        int[] nodesArray = new int[t_nodes];
+        for (int i = 0; i < t_nodes; i++) {
+            nodesArray[i] = sc.nextInt();
+        }
+        int MAX = nodesArray[t_nodes-1];
+        Deque<Integer> DQ = new LinkedList<Integer>();
+        Random random = new Random();
+        int coordinator = random.nextInt(t_nodes);
+        System.out.println("Coordinator "+coordinator+" is dead");
+        System.out.print("Enter Initiator: ");
+        int initiator = sc.nextInt();
+        int init = initiator;
+        while (t_nodes-->0){
+            if(initiator == coordinator){
+                initiator++;
+                t_nodes--;
+            } else if (initiator == MAX) {
+                DQ.addLast(initiator);
+                initiator = 0;
+                DQ.addLast(initiator);
+                initiator++;
+                t_nodes--;
+            }
+            DQ.addLast(initiator);
+            initiator++;
+            t_nodes--;
+            System.out.println(DQ);
+        }
+        coordinator = Collections.max(DQ);
+        System.out.println("New Coordinator: "+coordinator);
+        for (int i = 0; i < nodesArray.length; i++) {
+            if(i == init){
+                continue;
+            }
+            System.out.println("Initiator "+init+" send message to "+i+" ,new coordinator is: "+coordinator);
+        }
+    }
+}
