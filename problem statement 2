@@ -1,1 +1,195 @@
 
+1)arglist.java
+public class arglist {
+	String argname;
+	arglist(String argument) {
+		this.argname = argument;
+	}
+}
+
+
+2)mdt.java
+
+public class mdt {
+	String stmnt;
+	public mdt() {
+		stmnt="";
+	}
+}
+
+3)mnt.java
+
+public class mnt {
+	String name;
+	int addr;
+	int arg_cnt;
+	mnt(String name, int addr){
+		this.name = name;
+		this.addr = addr;
+		this.arg_cnt = 0;
+	}
+}
+
+
+4)input.txt (given in question)
+
+MACRO
+INCR &X,&Y,&REG1 = AREG
+MOVER &REG1,&X
+ADD &REG1,&Y
+MOVEM &REG1,&X
+MEND
+MACRO
+DECR &A,&B,&REG2 = BREG
+MOVER &REG2,&A
+SUB &REG2,&B
+MOVEM &REG2,&A
+MEND
+START 100
+READ N1
+READ N2
+INCR N1,N2
+DECR N1,N3
+STOP
+N1 DS 1
+N2 DS 2
+N3 DS 1
+END
+
+
+5)Mpass1.java
+
+import java.io.*;
+
+public class Mpass1 {
+	public static void main(String[] args) throws IOException {
+
+		BufferedReader br1 = new BufferedReader(new FileReader("C:\\Users\\Samiksha\\eclipse-workspace\\macro\\src\\input.txt"));
+		String line;
+		mdt[] MDT = new mdt[20];
+		mnt[] MNT = new mnt[4];
+		arglist[] ARGLIST = new arglist[10];
+
+		boolean macro_start = false;
+		boolean macro_end = false;
+		boolean fill_arglist = false;
+		int mdt_cnt = 0;
+		int mnt_cnt = 0;
+		int arglist_cnt = 0;
+
+		while ((line = br1.readLine()) != null) {
+			line = line.replaceAll(",", " ");
+			String[] tokens = line.split("\\s+");
+			MDT[mdt_cnt] = new mdt();
+
+			String stmnt = "";
+
+			for (int i = 0; i < tokens.length; i++) {
+				if (tokens[i].equalsIgnoreCase("mend")) {
+					MDT[mdt_cnt++].stmnt = "\t" + tokens[i];
+					macro_end = true;
+				}
+				if (tokens[i].equalsIgnoreCase("macro")) {
+					macro_start = true;
+					macro_end = false;
+				} else if (!macro_end) {
+					if (macro_start) {
+						MNT[mnt_cnt++] = new mnt(tokens[i], mdt_cnt);
+						macro_start = false;
+						fill_arglist = true;
+					}
+					if (fill_arglist) {
+						while (i < tokens.length) {
+							MDT[mdt_cnt].stmnt = MDT[mdt_cnt].stmnt + "\t" + tokens[i];
+							stmnt = stmnt + "\t" + tokens[i];
+							if (tokens[i].matches("&[a-zA-Z]+") || tokens[i].matches("&[a-zA-Z]+[0-9]+")) {
+								ARGLIST[arglist_cnt++] = new arglist(tokens[i]);
+							}
+							i++;
+						}
+						fill_arglist = false;
+					} else {
+						if (tokens[i].matches("[a-zA-Z]+") || tokens[i].matches("[a-zA-Z]+[0-9]+")
+								|| tokens[i].matches("[0-9]")) {
+							MDT[mdt_cnt].stmnt = MDT[mdt_cnt].stmnt + "\t" + tokens[i];
+							stmnt = stmnt + "\t" + tokens[i];
+						}
+						if (tokens[i].matches("&[a-zA-Z]+") || tokens[i].matches("&[a-zA-Z]+[0-9]+")) {
+							for (int j = 0; j < arglist_cnt; j++) {
+								if (tokens[i].equals(ARGLIST[j].argname)) {
+									MDT[mdt_cnt].stmnt = MDT[mdt_cnt].stmnt + "\t#" + (j + 1);
+									stmnt = stmnt + "\t+" + (j + 1);
+								}
+							}
+						}
+					}
+				}
+			}
+			if (stmnt != "" && !macro_end) {
+				mdt_cnt++;
+			}
+		}
+
+		br1.close();
+
+		BufferedWriter bw1 = new BufferedWriter(new FileWriter("C:\\Users\\Samiksha\\eclipse-workspace\\macro\\src\\mnt.java"));
+		System.out.println("\n\t****************** Macro Name Table *****************");
+		System.out.println("\n\tIndex\tName\tAddress");
+
+		for (int i = 0; i < mnt_cnt; i++) {
+			System.out.println("\t" + i + "\t" + MNT[i].name + "\t" + MNT[i].addr);
+			bw1.write(MNT[i].name + "\t" + MNT[i].addr + "\n");
+		}
+		bw1.close();
+
+		bw1 = new BufferedWriter(new FileWriter("C:\\Users\\Samiksha\\eclipse-workspace\\macro\\src\\arglist.java"));
+		System.out.println("\n\t****************** Argument List Table *****************");
+		System.out.println("\n\tIndex\tName");
+
+		for (int i = 0; i < arglist_cnt; i++) {
+			System.out.println("\t" + i + "\t" + ARGLIST[i].argname);
+			bw1.write(ARGLIST[i].argname + "\n");
+		}
+		bw1.close();
+
+		bw1 = new BufferedWriter(new FileWriter("C:\\Users\\Samiksha\\eclipse-workspace\\macro\\src\\mdt.java"));
+		System.out.println("\n\t****************** Machine Definition Table *****************");
+		System.out.println("\n\tIndex\tStatement");
+
+		for (int i = 0; i < mdt_cnt; i++) {
+			System.out.println("\t" + i + MDT[i].stmnt);
+			bw1.write(MDT[i].stmnt + "\n");
+		}
+		bw1.close();
+	}
+}
+ 
+
+OUTPUT:
+
+	   ****************** Macro Name Table *****************
+
+        Index   Name    Address
+        0       INCR1   0
+        1       INCR2   4
+
+        ****************** Argument List Table *****************
+
+        Index   Name
+        0       &FIRST
+        1       &SECOND
+        2       &ARG1
+        3       &ARG2
+
+        ****************** Machine Definition Table *****************
+
+        Index   Statement
+        0       INCR1   &FIRST  &SECOND
+        1       A       1       #1
+        2       L       2       #2
+        3       MEND
+        4       INCR2   &ARG1   &ARG2
+        5       L       3       #3
+        6       ST      4       #4
+        7       MEND
+
